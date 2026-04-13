@@ -29,10 +29,10 @@
       {{ t('auth.linuxdo.signIn') }}
     </button>
 
-    <div v-if="showDivider" class="flex items-center gap-3">
+    <div class="flex items-center gap-3">
       <div class="h-px flex-1 bg-gray-200 dark:bg-dark-700"></div>
       <span class="text-xs text-gray-500 dark:text-dark-400">
-        {{ t('auth.oauthOrContinue') }}
+        {{ t('auth.linuxdo.orContinue') }}
       </span>
       <div class="h-px flex-1 bg-gray-200 dark:bg-dark-700"></div>
     </div>
@@ -43,12 +43,9 @@
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
-withDefaults(defineProps<{
+defineProps<{
   disabled?: boolean
-  showDivider?: boolean
-}>(), {
-  showDivider: true
-})
+}>()
 
 const route = useRoute()
 const { t } = useI18n()
@@ -61,3 +58,4 @@ function startLogin(): void {
   window.location.href = startURL
 }
 </script>
+

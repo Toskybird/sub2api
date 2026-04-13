@@ -72,12 +72,7 @@ func (h *APIKeyHandler) List(c *gin.Context) {
 	}
 
 	page, pageSize := response.ParsePagination(c)
-	params := pagination.PaginationParams{
-		Page:      page,
-		PageSize:  pageSize,
-		SortBy:    c.DefaultQuery("sort_by", "created_at"),
-		SortOrder: c.DefaultQuery("sort_order", "desc"),
-	}
+	params := pagination.PaginationParams{Page: page, PageSize: pageSize}
 
 	// Parse filter parameters
 	var filters service.APIKeyListFilters

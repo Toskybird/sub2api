@@ -91,14 +91,12 @@ func (h *UserHandler) List(c *gin.Context) {
 		GroupName:  strings.TrimSpace(c.Query("group_name")),
 		Attributes: parseAttributeFilters(c),
 	}
-	sortBy := c.DefaultQuery("sort_by", "created_at")
-	sortOrder := c.DefaultQuery("sort_order", "desc")
 	if raw, ok := c.GetQuery("include_subscriptions"); ok {
 		includeSubscriptions := parseBoolQueryWithDefault(raw, true)
 		filters.IncludeSubscriptions = &includeSubscriptions
 	}
 
-	users, total, err := h.adminService.ListUsers(c.Request.Context(), page, pageSize, filters, sortBy, sortOrder)
+	users, total, err := h.adminService.ListUsers(c.Request.Context(), page, pageSize, filters)
 	if err != nil {
 		response.ErrorFrom(c, err)
 		return
@@ -292,10 +290,8 @@ func (h *UserHandler) GetUserAPIKeys(c *gin.Context) {
 	}
 
 	page, pageSize := response.ParsePagination(c)
-	sortBy := c.DefaultQuery("sort_by", "created_at")
-	sortOrder := c.DefaultQuery("sort_order", "desc")
 
-	keys, total, err := h.adminService.GetUserAPIKeys(c.Request.Context(), userID, page, pageSize, sortBy, sortOrder)
+	keys, total, err := h.adminService.GetUserAPIKeys(c.Request.Context(), userID, page, pageSize)
 	if err != nil {
 		response.ErrorFrom(c, err)
 		return
