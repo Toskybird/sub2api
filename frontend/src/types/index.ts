@@ -51,6 +51,8 @@ export interface LoginRequest {
   email: string
   password: string
   turnstile_token?: string
+  captcha_id?: string
+  captcha_code?: string
 }
 
 export interface RegisterRequest {
@@ -60,11 +62,15 @@ export interface RegisterRequest {
   turnstile_token?: string
   promo_code?: string
   invitation_code?: string
+  captcha_id?: string
+  captcha_code?: string
 }
 
 export interface SendVerifyCodeRequest {
   email: string
   turnstile_token?: string
+  captcha_id?: string
+  captcha_code?: string
 }
 
 export interface SendVerifyCodeResponse {
@@ -96,6 +102,7 @@ export interface PublicSettings {
   invitation_code_enabled: boolean
   turnstile_enabled: boolean
   turnstile_site_key: string
+  captcha_enabled: boolean
   site_name: string
   site_logo: string
   site_subtitle: string

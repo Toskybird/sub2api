@@ -55,6 +55,7 @@ func initializeApplication(buildInfo handler.BuildInfo) (*Application, error) {
 	emailService := service.NewEmailService(settingRepository, emailCache)
 	turnstileVerifier := repository.NewTurnstileVerifier()
 	turnstileService := service.NewTurnstileService(settingService, turnstileVerifier)
+	captchaService := service.NewCaptchaService(redisClient, settingService)
 	emailQueueService := service.ProvideEmailQueueService(emailService)
 	promoCodeRepository := repository.NewPromoCodeRepository(client)
 	billingCache := repository.NewBillingCache(redisClient)
@@ -78,7 +79,7 @@ func initializeApplication(buildInfo handler.BuildInfo) (*Application, error) {
 	}
 	totpCache := repository.NewTotpCache(redisClient)
 	totpService := service.NewTotpService(userRepository, secretEncryptor, totpCache, settingService, emailService, emailQueueService)
-	authHandler := handler.NewAuthHandler(configConfig, authService, userService, settingService, promoService, redeemService, totpService)
+	authHandler := handler.NewAuthHandler(configConfig, authService, userService, settingService, promoService, redeemService, totpService, captchaService)
 	userHandler := handler.NewUserHandler(userService)
 	apiKeyHandler := handler.NewAPIKeyHandler(apiKeyService)
 	usageLogRepository := repository.NewUsageLogRepository(client, db)

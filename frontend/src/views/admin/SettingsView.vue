@@ -1025,6 +1025,31 @@
           </div>
         </div>
 
+        <!-- Image Captcha Settings -->
+        <div class="card">
+          <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ t('admin.settings.captcha.title') }}
+            </h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              {{ t('admin.settings.captcha.description') }}
+            </p>
+          </div>
+          <div class="space-y-5 p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <label class="font-medium text-gray-900 dark:text-white">{{
+                  t('admin.settings.captcha.enableCaptcha')
+                }}</label>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ t('admin.settings.captcha.enableCaptchaHint') }}
+                </p>
+              </div>
+              <Toggle v-model="form.captcha_enabled" />
+            </div>
+          </div>
+        </div>
+
         <!-- LinuxDo Connect OAuth 登录 -->
         <div class="card">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
@@ -2234,6 +2259,8 @@ const form = reactive<SettingsForm>({
   turnstile_site_key: '',
   turnstile_secret_key: '',
   turnstile_secret_key_configured: false,
+  // Image Captcha
+  captcha_enabled: false,
   // LinuxDo Connect OAuth 登录
   linuxdo_connect_enabled: false,
   linuxdo_connect_client_id: '',
@@ -2555,6 +2582,7 @@ async function saveSettings() {
       turnstile_enabled: form.turnstile_enabled,
       turnstile_site_key: form.turnstile_site_key,
       turnstile_secret_key: form.turnstile_secret_key || undefined,
+      captcha_enabled: form.captcha_enabled,
       linuxdo_connect_enabled: form.linuxdo_connect_enabled,
       linuxdo_connect_client_id: form.linuxdo_connect_client_id,
       linuxdo_connect_client_secret: form.linuxdo_connect_client_secret || undefined,

@@ -16,25 +16,27 @@ import (
 
 // AuthHandler handles authentication-related requests
 type AuthHandler struct {
-	cfg           *config.Config
-	authService   *service.AuthService
-	userService   *service.UserService
-	settingSvc    *service.SettingService
-	promoService  *service.PromoService
-	redeemService *service.RedeemService
-	totpService   *service.TotpService
+	cfg            *config.Config
+	authService    *service.AuthService
+	userService    *service.UserService
+	settingSvc     *service.SettingService
+	promoService   *service.PromoService
+	redeemService  *service.RedeemService
+	totpService    *service.TotpService
+	captchaService *service.CaptchaService
 }
 
 // NewAuthHandler creates a new AuthHandler
-func NewAuthHandler(cfg *config.Config, authService *service.AuthService, userService *service.UserService, settingService *service.SettingService, promoService *service.PromoService, redeemService *service.RedeemService, totpService *service.TotpService) *AuthHandler {
+func NewAuthHandler(cfg *config.Config, authService *service.AuthService, userService *service.UserService, settingService *service.SettingService, promoService *service.PromoService, redeemService *service.RedeemService, totpService *service.TotpService, captchaService *service.CaptchaService) *AuthHandler {
 	return &AuthHandler{
-		cfg:           cfg,
-		authService:   authService,
-		userService:   userService,
-		settingSvc:    settingService,
-		promoService:  promoService,
-		redeemService: redeemService,
-		totpService:   totpService,
+		cfg:            cfg,
+		authService:    authService,
+		userService:    userService,
+		settingSvc:     settingService,
+		promoService:   promoService,
+		redeemService:  redeemService,
+		totpService:    totpService,
+		captchaService: captchaService,
 	}
 }
 
@@ -46,6 +48,8 @@ type RegisterRequest struct {
 	TurnstileToken string `json:"turnstile_token"`
 	PromoCode      string `json:"promo_code"`      // 注册优惠码
 	InvitationCode string `json:"invitation_code"` // 邀请码
+	CaptchaID      string `json:"captcha_id"`      // 图形验证码 ID
+	CaptchaCode    string `json:"captcha_code"`    // 图形验证码答案
 }
 
 // SendVerifyCodeRequest 发送验证码请求
@@ -65,6 +69,8 @@ type LoginRequest struct {
 	Email          string `json:"email" binding:"required,email"`
 	Password       string `json:"password" binding:"required"`
 	TurnstileToken string `json:"turnstile_token"`
+	CaptchaID      string `json:"captcha_id"`   // 图形验证码 ID
+	CaptchaCode    string `json:"captcha_code"` // 图形验证码答案
 }
 
 // AuthResponse 认证响应格式（匹配前端期望）
@@ -119,6 +125,14 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
+	// 图形验证码校验
+	if h.captchaService.IsEnabled(c.Request.Context()) {
+		if err := h.captchaService.Verify(c.Request.Context(), req.CaptchaID, req.CaptchaCode); err != nil {
+			response.ErrorFrom(c, err)
+			return
+		}
+	}
+
 	_, user, err := h.authService.RegisterWithVerification(c.Request.Context(), req.Email, req.Password, req.VerifyCode, req.PromoCode, req.InvitationCode)
 	if err != nil {
 		response.ErrorFrom(c, err)
@@ -168,6 +182,14 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	if err := h.authService.VerifyTurnstile(c.Request.Context(), req.TurnstileToken, ip.GetClientIP(c)); err != nil {
 		response.ErrorFrom(c, err)
 		return
+	}
+
+	// 图形验证码校验
+	if h.captchaService.IsEnabled(c.Request.Context()) {
+		if err := h.captchaService.Verify(c.Request.Context(), req.CaptchaID, req.CaptchaCode); err != nil {
+			response.ErrorFrom(c, err)
+			return
+		}
 	}
 
 	token, user, err := h.authService.Login(c.Request.Context(), req.Email, req.Password)
@@ -437,6 +459,8 @@ func (h *AuthHandler) ValidateInvitationCode(c *gin.Context) {
 type ForgotPasswordRequest struct {
 	Email          string `json:"email" binding:"required,email"`
 	TurnstileToken string `json:"turnstile_token"`
+	CaptchaID      string `json:"captcha_id"`   // 图形验证码 ID
+	CaptchaCode    string `json:"captcha_code"` // 图形验证码答案
 }
 
 // ForgotPasswordResponse 忘记密码响应
@@ -457,6 +481,14 @@ func (h *AuthHandler) ForgotPassword(c *gin.Context) {
 	if err := h.authService.VerifyTurnstile(c.Request.Context(), req.TurnstileToken, ip.GetClientIP(c)); err != nil {
 		response.ErrorFrom(c, err)
 		return
+	}
+
+	// 图形验证码校验
+	if h.captchaService.IsEnabled(c.Request.Context()) {
+		if err := h.captchaService.Verify(c.Request.Context(), req.CaptchaID, req.CaptchaCode); err != nil {
+			response.ErrorFrom(c, err)
+			return
+		}
 	}
 
 	frontendBaseURL := strings.TrimSpace(h.settingSvc.GetFrontendURL(c.Request.Context()))
@@ -607,4 +639,15 @@ func (h *AuthHandler) RevokeAllSessions(c *gin.Context) {
 	response.Success(c, RevokeAllSessionsResponse{
 		Message: "All sessions have been revoked. Please log in again.",
 	})
+}
+
+// GetCaptcha 生成图形验证码
+// GET /api/v1/auth/captcha
+func (h *AuthHandler) GetCaptcha(c *gin.Context) {
+	result, err := h.captchaService.Generate(c.Request.Context())
+	if err != nil {
+		response.InternalError(c, "Failed to generate captcha")
+		return
+	}
+	response.Success(c, result)
 }

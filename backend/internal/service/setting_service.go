@@ -150,6 +150,7 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		SettingKeyTotpEnabled,
 		SettingKeyTurnstileEnabled,
 		SettingKeyTurnstileSiteKey,
+		SettingKeyCaptchaEnabled,
 		SettingKeySiteName,
 		SettingKeySiteLogo,
 		SettingKeySiteSubtitle,
@@ -195,6 +196,7 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		TotpEnabled:                      settings[SettingKeyTotpEnabled] == "true",
 		TurnstileEnabled:                 settings[SettingKeyTurnstileEnabled] == "true",
 		TurnstileSiteKey:                 settings[SettingKeyTurnstileSiteKey],
+		CaptchaEnabled:                   settings[SettingKeyCaptchaEnabled] == "true",
 		SiteName:                         s.getStringOrDefault(settings, SettingKeySiteName, "Sub2API"),
 		SiteLogo:                         settings[SettingKeySiteLogo],
 		SiteSubtitle:                     s.getStringOrDefault(settings, SettingKeySiteSubtitle, "Subscription to API Conversion Platform"),
@@ -451,6 +453,9 @@ func (s *SettingService) UpdateSettings(ctx context.Context, settings *SystemSet
 	if settings.TurnstileSecretKey != "" {
 		updates[SettingKeyTurnstileSecretKey] = settings.TurnstileSecretKey
 	}
+
+	// 图形验证码设置
+	updates[SettingKeyCaptchaEnabled] = strconv.FormatBool(settings.CaptchaEnabled)
 
 	// LinuxDo Connect OAuth 登录
 	updates[SettingKeyLinuxDoConnectEnabled] = strconv.FormatBool(settings.LinuxDoConnectEnabled)
@@ -879,6 +884,7 @@ func (s *SettingService) parseSettings(settings map[string]string) *SystemSettin
 		TurnstileEnabled:                 settings[SettingKeyTurnstileEnabled] == "true",
 		TurnstileSiteKey:                 settings[SettingKeyTurnstileSiteKey],
 		TurnstileSecretKeyConfigured:     settings[SettingKeyTurnstileSecretKey] != "",
+		CaptchaEnabled:                   settings[SettingKeyCaptchaEnabled] == "true",
 		SiteName:                         s.getStringOrDefault(settings, SettingKeySiteName, "Sub2API"),
 		SiteLogo:                         settings[SettingKeySiteLogo],
 		SiteSubtitle:                     s.getStringOrDefault(settings, SettingKeySiteSubtitle, "Subscription to API Conversion Platform"),
@@ -1047,6 +1053,15 @@ func (s *SettingService) getStringOrDefault(settings map[string]string, key, def
 // IsTurnstileEnabled 检查是否启用 Turnstile 验证
 func (s *SettingService) IsTurnstileEnabled(ctx context.Context) bool {
 	value, err := s.settingRepo.GetValue(ctx, SettingKeyTurnstileEnabled)
+	if err != nil {
+		return false
+	}
+	return value == "true"
+}
+
+// IsCaptchaEnabled 检查是否启用图形验证码
+func (s *SettingService) IsCaptchaEnabled(ctx context.Context) bool {
+	value, err := s.settingRepo.GetValue(ctx, SettingKeyCaptchaEnabled)
 	if err != nil {
 		return false
 	}

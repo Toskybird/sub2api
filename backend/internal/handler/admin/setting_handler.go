@@ -92,6 +92,7 @@ func (h *SettingHandler) GetSettings(c *gin.Context) {
 		TurnstileEnabled:                     settings.TurnstileEnabled,
 		TurnstileSiteKey:                     settings.TurnstileSiteKey,
 		TurnstileSecretKeyConfigured:         settings.TurnstileSecretKeyConfigured,
+		CaptchaEnabled:                       settings.CaptchaEnabled,
 		LinuxDoConnectEnabled:                settings.LinuxDoConnectEnabled,
 		LinuxDoConnectClientID:               settings.LinuxDoConnectClientID,
 		LinuxDoConnectClientSecretConfigured: settings.LinuxDoConnectClientSecretConfigured,
@@ -157,6 +158,9 @@ type UpdateSettingsRequest struct {
 	TurnstileEnabled   bool   `json:"turnstile_enabled"`
 	TurnstileSiteKey   string `json:"turnstile_site_key"`
 	TurnstileSecretKey string `json:"turnstile_secret_key"`
+
+	// 图形验证码设置
+	CaptchaEnabled bool `json:"captcha_enabled"`
 
 	// LinuxDo Connect OAuth 登录
 	LinuxDoConnectEnabled      bool   `json:"linuxdo_connect_enabled"`
@@ -550,6 +554,7 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		TurnstileEnabled:                 req.TurnstileEnabled,
 		TurnstileSiteKey:                 req.TurnstileSiteKey,
 		TurnstileSecretKey:               req.TurnstileSecretKey,
+		CaptchaEnabled:                   req.CaptchaEnabled,
 		LinuxDoConnectEnabled:            req.LinuxDoConnectEnabled,
 		LinuxDoConnectClientID:           req.LinuxDoConnectClientID,
 		LinuxDoConnectClientSecret:       req.LinuxDoConnectClientSecret,
@@ -665,6 +670,7 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		TurnstileEnabled:                     updatedSettings.TurnstileEnabled,
 		TurnstileSiteKey:                     updatedSettings.TurnstileSiteKey,
 		TurnstileSecretKeyConfigured:         updatedSettings.TurnstileSecretKeyConfigured,
+		CaptchaEnabled:                       updatedSettings.CaptchaEnabled,
 		LinuxDoConnectEnabled:                updatedSettings.LinuxDoConnectEnabled,
 		LinuxDoConnectClientID:               updatedSettings.LinuxDoConnectClientID,
 		LinuxDoConnectClientSecretConfigured: updatedSettings.LinuxDoConnectClientSecretConfigured,

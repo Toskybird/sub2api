@@ -56,6 +56,9 @@ export interface SystemSettings {
   turnstile_site_key: string
   turnstile_secret_key_configured: boolean
 
+  // Image Captcha settings
+  captcha_enabled: boolean
+
   // LinuxDo Connect OAuth settings
   linuxdo_connect_enabled: boolean
   linuxdo_connect_client_id: string
@@ -127,6 +130,7 @@ export interface UpdateSettingsRequest {
   turnstile_enabled?: boolean
   turnstile_site_key?: string
   turnstile_secret_key?: string
+  captcha_enabled?: boolean
   linuxdo_connect_enabled?: boolean
   linuxdo_connect_client_id?: string
   linuxdo_connect_client_secret?: string

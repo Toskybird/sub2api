@@ -391,6 +391,10 @@ export default {
     turnstileExpired: '验证已过期，请重试',
     turnstileFailed: '验证失败，请重试',
     completeVerification: '请完成验证',
+    captchaRequired: '请输入验证码',
+    captchaRefresh: '刷新验证码',
+    captchaPlaceholder: '请输入图中字符',
+    captchaFailed: '验证码错误，请重新输入',
     verifyYourEmail: '验证您的邮箱',
     sessionExpired: '会话已过期',
     sessionExpiredDesc: '请返回注册页面重新开始。',
@@ -4373,6 +4377,12 @@ export default {
         cloudflareDashboard: 'Cloudflare Dashboard',
         secretKeyHint: '服务端验证密钥（请保密）',
         secretKeyConfiguredHint: '密钥已配置，留空以保留当前值。'
+      },
+      captcha: {
+        title: '图形验证码',
+        description: '启用后，登录/注册/找回密码时需要填写验证码，适用于离线环境',
+        enableCaptcha: '启用图形验证码',
+        enableCaptchaHint: '图形验证码完全本地生成，无需外部服务'
       },
       linuxdo: {
         title: 'LinuxDo Connect 登录',

@@ -62,6 +62,10 @@ func RegisterAuthRoutes(
 		auth.POST("/reset-password", rateLimiter.LimitWithOptions("reset-password", 10, time.Minute, middleware.RateLimitOptions{
 			FailureMode: middleware.RateLimitFailClose,
 		}), h.Auth.ResetPassword)
+		// 图形验证码接口：每分钟最多 30 次（Redis 故障时 fail-open，不影响正常使用）
+		auth.GET("/captcha", rateLimiter.LimitWithOptions("auth-captcha", 30, time.Minute, middleware.RateLimitOptions{
+			FailureMode: middleware.RateLimitFailOpen,
+		}), h.Auth.GetCaptcha)
 		auth.GET("/oauth/linuxdo/start", h.Auth.LinuxDoOAuthStart)
 		auth.GET("/oauth/linuxdo/callback", h.Auth.LinuxDoOAuthCallback)
 		auth.POST("/oauth/linuxdo/complete-registration",

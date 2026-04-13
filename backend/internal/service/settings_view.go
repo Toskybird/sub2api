@@ -24,6 +24,8 @@ type SystemSettings struct {
 	TurnstileSecretKey           string
 	TurnstileSecretKeyConfigured bool
 
+	CaptchaEnabled bool // 图形验证码
+
 	// LinuxDo Connect OAuth 登录
 	LinuxDoConnectEnabled                bool
 	LinuxDoConnectClientID               string
@@ -96,6 +98,7 @@ type PublicSettings struct {
 	TotpEnabled                      bool // TOTP 双因素认证
 	TurnstileEnabled                 bool
 	TurnstileSiteKey                 string
+	CaptchaEnabled                   bool // 图形验证码
 	SiteName                         string
 	SiteLogo                         string
 	SiteSubtitle                     string

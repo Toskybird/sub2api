@@ -101,6 +101,18 @@
           </p>
         </div>
 
+        <!-- Image Captcha Widget -->
+        <div v-if="captchaEnabled">
+          <ImageCaptchaWidget
+            ref="captchaRef"
+            @verify="onCaptchaVerify"
+            @error="onCaptchaError"
+          />
+          <p v-if="errors.captcha" class="input-error-text mt-1">
+            {{ errors.captcha }}
+          </p>
+        </div>
+
         <!-- Error Message -->
         <transition name="fade">
           <div
@@ -121,7 +133,7 @@
         <!-- Submit Button -->
         <button
           type="submit"
-          :disabled="isLoading || (turnstileEnabled && !turnstileToken)"
+          :disabled="isLoading || (turnstileEnabled && !turnstileToken) || (captchaEnabled && !captchaPayload)"
           class="btn btn-primary w-full"
         >
           <svg
@@ -184,6 +196,7 @@ import LinuxDoOAuthSection from '@/components/auth/LinuxDoOAuthSection.vue'
 import TotpLoginModal from '@/components/auth/TotpLoginModal.vue'
 import Icon from '@/components/icons/Icon.vue'
 import TurnstileWidget from '@/components/TurnstileWidget.vue'
+import ImageCaptchaWidget from '@/components/ImageCaptchaWidget.vue'
 import { useAuthStore, useAppStore } from '@/stores'
 import { getPublicSettings, isTotp2FARequired } from '@/api/auth'
 import type { TotpLoginResponse } from '@/types'
@@ -208,10 +221,15 @@ const turnstileSiteKey = ref<string>('')
 const linuxdoOAuthEnabled = ref<boolean>(false)
 const backendModeEnabled = ref<boolean>(false)
 const passwordResetEnabled = ref<boolean>(false)
+const captchaEnabled = ref<boolean>(false)
 
 // Turnstile
 const turnstileRef = ref<InstanceType<typeof TurnstileWidget> | null>(null)
 const turnstileToken = ref<string>('')
+
+// Image Captcha
+const captchaRef = ref<InstanceType<typeof ImageCaptchaWidget> | null>(null)
+const captchaPayload = ref<{ id: string; code: string } | null>(null)
 
 // 2FA state
 const show2FAModal = ref<boolean>(false)
@@ -227,7 +245,8 @@ const formData = reactive({
 const errors = reactive({
   email: '',
   password: '',
-  turnstile: ''
+  turnstile: '',
+  captcha: ''
 })
 
 // ==================== Lifecycle ====================
@@ -248,6 +267,7 @@ onMounted(async () => {
     linuxdoOAuthEnabled.value = settings.linuxdo_oauth_enabled
     backendModeEnabled.value = settings.backend_mode_enabled
     passwordResetEnabled.value = settings.password_reset_enabled
+    captchaEnabled.value = settings.captcha_enabled
   } catch (error) {
     console.error('Failed to load public settings:', error)
   }
@@ -268,6 +288,18 @@ function onTurnstileExpire(): void {
 function onTurnstileError(): void {
   turnstileToken.value = ''
   errors.turnstile = t('auth.turnstileFailed')
+}
+
+// ==================== Captcha Handlers ====================
+
+function onCaptchaVerify(payload: { id: string; code: string }): void {
+  captchaPayload.value = payload
+  errors.captcha = ''
+}
+
+function onCaptchaError(): void {
+  captchaPayload.value = null
+  errors.captcha = t('auth.captchaFailed')
 }
 
 // ==================== Validation ====================
@@ -304,6 +336,12 @@ function validateForm(): boolean {
     isValid = false
   }
 
+  // Captcha validation
+  if (captchaEnabled.value && !captchaPayload.value) {
+    errors.captcha = t('auth.captchaRequired')
+    isValid = false
+  }
+
   return isValid
 }
 
@@ -325,7 +363,9 @@ async function handleLogin(): Promise<void> {
     const response = await authStore.login({
       email: formData.email,
       password: formData.password,
-      turnstile_token: turnstileEnabled.value ? turnstileToken.value : undefined
+      turnstile_token: turnstileEnabled.value ? turnstileToken.value : undefined,
+      captcha_id: captchaPayload.value?.id,
+      captcha_code: captchaPayload.value?.code
     })
 
     // Check if 2FA is required
@@ -349,6 +389,12 @@ async function handleLogin(): Promise<void> {
     if (turnstileRef.value) {
       turnstileRef.value.reset()
       turnstileToken.value = ''
+    }
+
+    // Reset Captcha on error
+    if (captchaRef.value) {
+      captchaRef.value.reset()
+      captchaPayload.value = null
     }
 
     // Handle login error

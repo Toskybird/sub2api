@@ -392,6 +392,10 @@ export default {
     turnstileExpired: 'Verification expired, please try again',
     turnstileFailed: 'Verification failed, please try again',
     completeVerification: 'Please complete the verification',
+    captchaRequired: 'Please enter the captcha',
+    captchaRefresh: 'Refresh captcha',
+    captchaPlaceholder: 'Enter characters shown',
+    captchaFailed: 'Incorrect captcha, please try again',
     verifyYourEmail: 'Verify Your Email',
     sessionExpired: 'Session expired',
     sessionExpiredDesc: 'Please go back to the registration page and start again.',
@@ -4207,6 +4211,12 @@ export default {
         cloudflareDashboard: 'Cloudflare Dashboard',
         secretKeyHint: 'Server-side verification key (keep this secret)',
         secretKeyConfiguredHint: 'Secret key configured. Leave empty to keep the current value.'      },
+      captcha: {
+        title: 'Image Captcha',
+        description: 'When enabled, users must complete a captcha on login/register/forgot-password. Works fully offline.',
+        enableCaptcha: 'Enable Image Captcha',
+        enableCaptchaHint: 'Captcha is generated locally — no external service required'
+      },
       linuxdo: {
         title: 'LinuxDo Connect Login',
         description: 'Configure LinuxDo Connect OAuth for Sub2API end-user login',

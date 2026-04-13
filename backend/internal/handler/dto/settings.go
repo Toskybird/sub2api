@@ -46,6 +46,8 @@ type SystemSettings struct {
 	TurnstileSiteKey             string `json:"turnstile_site_key"`
 	TurnstileSecretKeyConfigured bool   `json:"turnstile_secret_key_configured"`
 
+	CaptchaEnabled bool `json:"captcha_enabled"` // 图形验证码
+
 	LinuxDoConnectEnabled                bool   `json:"linuxdo_connect_enabled"`
 	LinuxDoConnectClientID               string `json:"linuxdo_connect_client_id"`
 	LinuxDoConnectClientSecretConfigured bool   `json:"linuxdo_connect_client_secret_configured"`
@@ -115,6 +117,7 @@ type PublicSettings struct {
 	TotpEnabled                      bool             `json:"totp_enabled"` // TOTP 双因素认证
 	TurnstileEnabled                 bool             `json:"turnstile_enabled"`
 	TurnstileSiteKey                 string           `json:"turnstile_site_key"`
+	CaptchaEnabled                   bool             `json:"captcha_enabled"` // 图形验证码
 	SiteName                         string           `json:"site_name"`
 	SiteLogo                         string           `json:"site_logo"`
 	SiteSubtitle                     string           `json:"site_subtitle"`

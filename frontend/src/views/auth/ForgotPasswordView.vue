@@ -83,6 +83,18 @@
           </p>
         </div>
 
+        <!-- Image Captcha Widget -->
+        <div v-if="captchaEnabled">
+          <ImageCaptchaWidget
+            ref="captchaRef"
+            @verify="onCaptchaVerify"
+            @error="onCaptchaError"
+          />
+          <p v-if="errors.captcha" class="input-error-text mt-1">
+            {{ errors.captcha }}
+          </p>
+        </div>
+
         <!-- Error Message -->
         <transition name="fade">
           <div
@@ -103,7 +115,7 @@
         <!-- Submit Button -->
         <button
           type="submit"
-          :disabled="isLoading || (turnstileEnabled && !turnstileToken)"
+          :disabled="isLoading || (turnstileEnabled && !turnstileToken) || (captchaEnabled && !captchaPayload)"
           class="btn btn-primary w-full"
         >
           <svg
@@ -153,6 +165,7 @@ import { useI18n } from 'vue-i18n'
 import { AuthLayout } from '@/components/layout'
 import Icon from '@/components/icons/Icon.vue'
 import TurnstileWidget from '@/components/TurnstileWidget.vue'
+import ImageCaptchaWidget from '@/components/ImageCaptchaWidget.vue'
 import { useAppStore } from '@/stores'
 import { getPublicSettings, forgotPassword } from '@/api/auth'
 
@@ -171,10 +184,15 @@ const errorMessage = ref<string>('')
 // Public settings
 const turnstileEnabled = ref<boolean>(false)
 const turnstileSiteKey = ref<string>('')
+const captchaEnabled = ref<boolean>(false)
 
 // Turnstile
 const turnstileRef = ref<InstanceType<typeof TurnstileWidget> | null>(null)
 const turnstileToken = ref<string>('')
+
+// Image Captcha
+const captchaRef = ref<InstanceType<typeof ImageCaptchaWidget> | null>(null)
+const captchaPayload = ref<{ id: string; code: string } | null>(null)
 
 const formData = reactive({
   email: ''
@@ -182,7 +200,8 @@ const formData = reactive({
 
 const errors = reactive({
   email: '',
-  turnstile: ''
+  turnstile: '',
+  captcha: ''
 })
 
 // ==================== Lifecycle ====================
@@ -192,6 +211,7 @@ onMounted(async () => {
     const settings = await getPublicSettings()
     turnstileEnabled.value = settings.turnstile_enabled
     turnstileSiteKey.value = settings.turnstile_site_key || ''
+    captchaEnabled.value = settings.captcha_enabled
   } catch (error) {
     console.error('Failed to load public settings:', error)
   }
@@ -214,11 +234,24 @@ function onTurnstileError(): void {
   errors.turnstile = t('auth.turnstileFailed')
 }
 
+// ==================== Captcha Handlers ====================
+
+function onCaptchaVerify(payload: { id: string; code: string }): void {
+  captchaPayload.value = payload
+  errors.captcha = ''
+}
+
+function onCaptchaError(): void {
+  captchaPayload.value = null
+  errors.captcha = t('auth.captchaFailed')
+}
+
 // ==================== Validation ====================
 
 function validateForm(): boolean {
   errors.email = ''
   errors.turnstile = ''
+  errors.captcha = ''
 
   let isValid = true
 
@@ -234,6 +267,12 @@ function validateForm(): boolean {
   // Turnstile validation
   if (turnstileEnabled.value && !turnstileToken.value) {
     errors.turnstile = t('auth.completeVerification')
+    isValid = false
+  }
+
+  // Captcha validation
+  if (captchaEnabled.value && !captchaPayload.value) {
+    errors.captcha = t('auth.captchaRequired')
     isValid = false
   }
 
@@ -254,7 +293,9 @@ async function handleSubmit(): Promise<void> {
   try {
     await forgotPassword({
       email: formData.email,
-      turnstile_token: turnstileEnabled.value ? turnstileToken.value : undefined
+      turnstile_token: turnstileEnabled.value ? turnstileToken.value : undefined,
+      captcha_id: captchaPayload.value?.id,
+      captcha_code: captchaPayload.value?.code
     })
 
     isSubmitted.value = true
@@ -264,6 +305,12 @@ async function handleSubmit(): Promise<void> {
     if (turnstileRef.value) {
       turnstileRef.value.reset()
       turnstileToken.value = ''
+    }
+
+    // Reset Captcha on error
+    if (captchaRef.value) {
+      captchaRef.value.reset()
+      captchaPayload.value = null
     }
 
     const err = error as { message?: string; response?: { data?: { detail?: string } } }
