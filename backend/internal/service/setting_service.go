@@ -244,6 +244,7 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 		TotpEnabled                      bool            `json:"totp_enabled"`
 		TurnstileEnabled                 bool            `json:"turnstile_enabled"`
 		TurnstileSiteKey                 string          `json:"turnstile_site_key,omitempty"`
+		CaptchaEnabled                   bool            `json:"captcha_enabled"`
 		SiteName                         string          `json:"site_name"`
 		SiteLogo                         string          `json:"site_logo,omitempty"`
 		SiteSubtitle                     string          `json:"site_subtitle,omitempty"`
@@ -269,6 +270,7 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 		TotpEnabled:                      settings.TotpEnabled,
 		TurnstileEnabled:                 settings.TurnstileEnabled,
 		TurnstileSiteKey:                 settings.TurnstileSiteKey,
+		CaptchaEnabled:                   settings.CaptchaEnabled,
 		SiteName:                         settings.SiteName,
 		SiteLogo:                         settings.SiteLogo,
 		SiteSubtitle:                     settings.SiteSubtitle,

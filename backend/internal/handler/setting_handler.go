@@ -41,6 +41,7 @@ func (h *SettingHandler) GetPublicSettings(c *gin.Context) {
 		TotpEnabled:                      settings.TotpEnabled,
 		TurnstileEnabled:                 settings.TurnstileEnabled,
 		TurnstileSiteKey:                 settings.TurnstileSiteKey,
+		CaptchaEnabled:                   settings.CaptchaEnabled,
 		SiteName:                         settings.SiteName,
 		SiteLogo:                         settings.SiteLogo,
 		SiteSubtitle:                     settings.SiteSubtitle,
